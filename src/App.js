@@ -1,41 +1,60 @@
-import React, { useEffect, useState } from "react";
-import "./App.css";
-import "./index.css";
-import Header from "./Header";
-import axios from "axios";
+import React from "react";
+import { useEffect, useState } from "react";
 import Section from "./Section";
-import Tarih from "./Tarih";
-import styled from "styled-components";
+import axios from "axios";
+import Arama from "./Arama";
 
-const SCSection = styled.section``;
+const App = () => {
+  // Try to think through what state you'll need for this app before starting. Then build out
+  // the state properties here.
 
-function App() {
-  const [tarih, setTarih] = useState("");
-  const [data, setData] = useState("");
+  // Fetch characters from the API in an effect hook. Remember, anytime you have a
+  // side effect in a component, you want to think about which state and/or props it should
+  // sync up with, if any.
+  const [data, setData] = useState([]);
+  const [arama, setArama] = useState("");
+  const [icerik, setIcerik] = useState("");
+
   useEffect(() => {
     axios
-      .get(
-        "https://api.nasa.gov/planetary/apod?api_key=9rQEJkHZ6LtsCLGckODLSIqiQBia1eff1G1EiGXr&date=" +
-          tarih
-      )
+      .get("https://swapi.dev/api/people/")
       .then((response) => setData(response.data));
-  }, [tarih]);
+  }, []);
 
-  function dateChanger(tarih) {
-    let gun = new Date(tarih);
-    let gercekTarih = `${gun.getFullYear()}-${
-      gun.getMonth() + 1
-    }-${gun.getDate()}`;
-    setTarih(gercekTarih);
+  function handleClick(name) {
+    setIcerik(name === icerik ? null : name);
   }
 
   return (
     <div className="App">
-      <Header />
-      <Tarih onChange={dateChanger} />
-      <Section data={data} />
+      <h1 className="Header">Star Wars Major Characters List</h1>
+      {<Arama setArama={setArama} arama={arama} />}
+      {data
+        .filter((person) => {
+          if (arama === "") {
+            return person;
+          } else if (
+            person.name.toLowerCase().includes(arama.toLocaleLowerCase())
+          ) {
+            return person;
+          }
+        })
+        .map((person) => {
+          return (
+            <Section
+              key={person.name}
+              data={person}
+              handleClick={handleClick}
+              icerik={icerik}
+              setIcerik={setIcerik}
+            />
+          );
+        })}
+      {/* {films.map((person) => {
+        return <Section films={person} />;
+      })} */}
     </div>
   );
-}
+};
 
 export default App;
